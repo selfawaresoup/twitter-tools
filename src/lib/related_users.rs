@@ -3,8 +3,8 @@ use twitter_v2::authorization::{Oauth1aToken};
 use twitter_v2::User;
 use twitter_v2::query::{UserField};
 use tokio::time::{sleep_until, Duration, Instant};
-use lib::actions::{UserAction};
-use lib::read::{get_my_user};
+use crate::actions::{UserAction};
+use crate::read::{get_my_user};
 
 #[allow(dead_code)]
 pub enum UserRelation {

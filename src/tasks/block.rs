@@ -2,7 +2,7 @@ use lib::read::{get_user_by_name};
 use lib::actions::{Block, UserNoOp};
 use lib::auth::{auth_oauth1a};
 use lib::archive::get_archive;
-use crate::related_users::{RelatedUsers, UserRelation};
+use lib::related_users::{RelatedUsers, UserRelation};
 
 pub struct BlockWithFollowers {
 	
