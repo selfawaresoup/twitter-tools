@@ -8,14 +8,15 @@ use types::*;
 
 fn load_json_string(path: &str) ->  String {
 	let json_path = Path::new(path);
-	let mut json = fs::read_to_string(json_path).expect("Loading tweet.js failed");
+	println!("Loading {}", path);
+	let mut json = fs::read_to_string(json_path).expect("Loading failed");
 	let cut_offset = json.find('[').expect("first [ not found");
 	json.replace_range(..cut_offset, "");
 	json
 }
 
 fn get_all_tweets() -> Vec<Tweet> {
-	let json = load_json_string("data/archive/data/tweet.js");
+	let json = load_json_string("data/archive/data/tweets.js");
 	let entries:Vec<ArchiveEntry> = serde_json::from_str(&json).expect("JSON parsing failed");
 	let mut tweets:Vec<Tweet> = vec![];
 	
