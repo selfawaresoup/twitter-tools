@@ -2,7 +2,8 @@ use twitter_v2::TwitterApi;
 use twitter_v2::authorization::{Oauth1aToken};
 use twitter_v2::{User, Tweet};
 use twitter_v2::query::{UserField};
-use tokio::time::{sleep, Duration};
+use crate::delay::Delay;
+use async_std::task::block_on;
 
 pub enum TweetRelation {
 	Like,
@@ -21,6 +22,7 @@ pub struct TweetUsers {
 	ended: bool,
 	users: Vec<User>,
 	api: Option<TwitterApi<Oauth1aToken>>,
+	delay: Delay,
 }
 
 impl TweetUsers {
@@ -32,6 +34,7 @@ impl TweetUsers {
 			ended: false,
 			users: vec![],
 			api: None,
+			delay: Delay::new(60)
 		}
 	}
 	
@@ -42,79 +45,54 @@ impl TweetUsers {
 		self.pagination_token = None;
 	}
 	
-	async fn fetch(&mut self) {
-		let api = self.api.as_ref().unwrap();
-		let mut req = match self.relation {
-			TweetRelation::Like => api.get_tweet_liking_users(self.tweet.id),
-			TweetRelation::Retweet => api.get_tweet_retweeted_by(self.tweet.id)
-		};
-		req.user_fields([
-			UserField::Username
-		]);
-		
-		// println!("Pagination token: {}", self.pagination_token.to_owned().unwrap_or(String::from("<None>")));
-		
-		if let Some(t) = self.pagination_token.to_owned() {
-			req.pagination_token(&t);
-			println!("Request paginated, waiting 60 secs …");
-			sleep(Duration::from_secs(60)).await; // pause if this is a paginated request to prevent API throttling
-		}
-
-		let res = req.send().await.unwrap();
-		let meta_data = res.meta().unwrap();
-		self.pagination_token = meta_data.next_token.to_owned();
-		let related_users = res.data().unwrap();
-		
-		println!("Fetched {} related_users", related_users.len());
-
-		self.users.append(&mut related_users.to_owned());
-
-		match self.pagination_token {
-			Some(_) => {},
-			None => {
-				self.ended = true;
+	fn fetch(&mut self) {
+		block_on(async {
+			self.delay.wait();
+			let api = self.api.as_ref().unwrap();
+			let mut req = match self.relation {
+				TweetRelation::Like => api.get_tweet_liking_users(self.tweet.id),
+				TweetRelation::Retweet => api.get_tweet_retweeted_by(self.tweet.id)
+			};
+			req.user_fields([
+				UserField::Username
+			]);
+			
+			// println!("Pagination token: {}", self.pagination_token.to_owned().unwrap_or(String::from("<None>")));
+			
+			if let Some(t) = self.pagination_token.to_owned() {
+				req.pagination_token(&t);
+				println!("Request paginated, waiting 60 secs …");
 			}
-		}
-	}
-		
-	pub async fn each(&mut self, auth: Oauth1aToken, action: UserAction) -> ()
-	{
-		self.api = Some(TwitterApi::new(auth));
-		
-		loop {
-			if self.ended && self.users.is_empty() { break; }
-
-			if self.users.is_empty() {
-				println!("fetching");
-				self.fetch().await;
-			} else {
-				self.action(&action).await;
+			
+			let res = req.send().await.unwrap();
+			let meta_data = res.meta().unwrap();
+			self.pagination_token = meta_data.next_token.to_owned();
+			let related_users = res.data().unwrap();
+			
+			println!("Fetched {} related_users", related_users.len());
+			
+			self.users.append(&mut related_users.to_owned());
+			
+			match self.pagination_token {
+				Some(_) => {},
+				None => {
+					self.ended = true;
+				}
 			}
-		}
-	}
-
-	async fn action(&mut self, action: &UserAction) -> () {
-		let u = self.users.remove(0);
-		match action {
-			UserAction::Print => {
-				println!("{}", u.username);
-			},
-			UserAction::Block => {
-				println!("Blocking {} ...", u.username);
-				sleep(Duration::from_secs(1)).await;
-			}
-		}
-
-	}
-
-	pub async fn get_all(&mut self, auth: Oauth1aToken) -> Vec<User> {
-		self.api = Some(TwitterApi::new(auth));
-		
-		loop {
-			if self.ended { break }
-			self.fetch().await;
-		}
-
-		self.users.to_owned()
+		})
 	}
 }
+
+// impl Iterator for TweetUsers {
+// 	type Item = User;
+
+// 	fn next(&mut self) -> Option<Self::Item> {
+// 		if self.ended { return None; }
+	
+// 		if self.batch.len() == 0 {
+// 			self.fetch();
+// 		}
+
+// 		self.batch.pop_front()
+// 	}
+// }

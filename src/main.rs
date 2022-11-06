@@ -12,8 +12,7 @@ use tasks::delete::DeleteOldTweets;
 use tasks::block::BlockWithFollowers;
 use lib::archive::{Stats};
 
-#[tokio::main]
-async fn main() {
+fn main() {
 	let args = read_args();
 	match args.command {
 		Command::Unknown => {
@@ -25,41 +24,30 @@ async fn main() {
 		
 		Command::GetTweet => {
 			let id = args.options[0].parse::<u64>().expect("ID needs to be a positive integer number");
-			let tweet = get_tweet(auth_oauth1a(), NumericId::new(id)).await.unwrap();
+			let tweet = get_tweet(auth_oauth1a(), NumericId::new(id)).unwrap();
 			print_tweet(tweet);
 		},
 		
 		Command::GetUser => {
 			let user_name: String = args.options[0].to_owned();
-			let user = get_user_by_name(auth_oauth1a(), user_name).await;
+			let user = get_user_by_name(auth_oauth1a(), user_name);
 			print_user(user);
 		},
 		
 		Command::BlockWithFollowers => {
 			let user_name: String = args.options[0].to_owned();
-			BlockWithFollowers::run(&user_name).await;
-		},
-		
-		Command::BlockLikingUsers => {
-			
-		},
-		
-		Command::GetAllFollowers => {
-			let user_name: String = args.options[0].to_owned();
-			let user = get_user_by_name(auth_oauth1a(), user_name).await;
-			
-			let mut ru = RelatedUsers::new(user, UserRelation::Followers);
-			let users = ru.get_all(auth_oauth1a()).await;
-			
-			println!("Found {} related users", users.len());
+			BlockWithFollowers::run(&user_name);
 		},
 		
 		Command::DeleteOldTweets => {
-			DeleteOldTweets::run().await;
+			DeleteOldTweets::run();
 		},
 		
 		Command::ArchiveStats => {
 			Stats::run();
 		},
+		_ => {
+			println!("Not implemented yet");
+		}
 	};
 }

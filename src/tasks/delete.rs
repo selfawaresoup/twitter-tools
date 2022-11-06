@@ -23,7 +23,7 @@ impl DeleteOldTweets {
     ancient_cutoff
   }
 
-  pub async fn run() {
+  pub fn run() {
     let archive = get_archive();
     let max_tweet_age = dotenv::var("MAX_TWEET_AGE").unwrap().parse::<u64>().unwrap();
     let minimum_likes = dotenv::var("MINIMUM_LIKES").unwrap().parse::<u64>().unwrap();
@@ -60,13 +60,13 @@ impl DeleteOldTweets {
       match tweet.full_text.find("RT") {
         Some(index) => {
           if index == 0 {
-            delete_retweet.run(auth_oauth1a(), &tweet).await;
+            delete_retweet.run(auth_oauth1a(), &tweet);
             continue;
           }
         }
         _ => ()
       }
-      delete_tweet.run(auth_oauth1a(), &tweet).await;
+      delete_tweet.run(auth_oauth1a(), &tweet);
     }
   }
 }

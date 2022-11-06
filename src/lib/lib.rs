@@ -5,3 +5,4 @@ pub mod print;
 pub mod actions;
 pub mod archive;
 pub mod auth;
+pub mod delay;
