@@ -3,9 +3,6 @@ mod tasks;
 use args::{read_args, Command};
 use lib::auth::{auth_oauth1a};
 use lib::read::{get_tweet, get_user_by_name};
-
-use lib::related_users::{RelatedUsers, UserRelation};
-// use lib::tweet_users::{TweetUsers, TweetRelation, UserAction};
 use lib::print::{print_tweet, print_user};
 use twitter_v2::id::NumericId;
 use tasks::delete::DeleteOldTweets;
