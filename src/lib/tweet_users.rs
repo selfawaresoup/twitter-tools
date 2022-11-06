@@ -4,6 +4,7 @@ use twitter_v2::{User, Tweet};
 use twitter_v2::query::{UserField};
 use crate::delay::Delay;
 use async_std::task::block_on;
+use std::collections::VecDeque;
 
 pub enum TweetRelation {
 	Like,
@@ -20,29 +21,23 @@ pub struct TweetUsers {
 	pub tweet: Tweet,
 	pagination_token: Option<String>,
 	ended: bool,
-	users: Vec<User>,
+	batch: VecDeque<User>,
 	api: Option<TwitterApi<Oauth1aToken>>,
 	delay: Delay,
 }
 
 impl TweetUsers {
-	pub fn new(tweet: Tweet, relation: TweetRelation) -> TweetUsers {
+	pub fn new(auth: Oauth1aToken, tweet: Tweet, relation: TweetRelation) -> TweetUsers {
+		let api = Some(TwitterApi::new(auth.clone()));
 		TweetUsers{
 			tweet,
 			relation,
 			pagination_token: None,
 			ended: false,
-			users: vec![],
-			api: None,
+			batch: VecDeque::new(),
+			api,
 			delay: Delay::new(60)
 		}
-	}
-	
-	pub fn reset(&mut self) {
-		self.users =  vec![];
-		self.api = None;
-		self.ended = false;
-		self.pagination_token = None;
 	}
 	
 	fn fetch(&mut self) {
@@ -56,12 +51,9 @@ impl TweetUsers {
 			req.user_fields([
 				UserField::Username
 			]);
-			
-			// println!("Pagination token: {}", self.pagination_token.to_owned().unwrap_or(String::from("<None>")));
-			
+
 			if let Some(t) = self.pagination_token.to_owned() {
 				req.pagination_token(&t);
-				println!("Request paginated, waiting 60 secs …");
 			}
 			
 			let res = req.send().await.unwrap();
@@ -70,8 +62,9 @@ impl TweetUsers {
 			let related_users = res.data().unwrap();
 			
 			println!("Fetched {} related_users", related_users.len());
-			
-			self.users.append(&mut related_users.to_owned());
+			for user in related_users {
+				self.batch.push_back(user.to_owned());
+			}
 			
 			match self.pagination_token {
 				Some(_) => {},
@@ -83,16 +76,15 @@ impl TweetUsers {
 	}
 }
 
-// impl Iterator for TweetUsers {
-// 	type Item = User;
+impl Iterator for TweetUsers {
+	type Item = User;
 
-// 	fn next(&mut self) -> Option<Self::Item> {
-// 		if self.ended { return None; }
-	
-// 		if self.batch.len() == 0 {
-// 			self.fetch();
-// 		}
+	fn next(&mut self) -> Option<Self::Item> {
+		if self.batch.len() == 0 {
+			if self.ended { return None; }
+			self.fetch();
+		}
 
-// 		self.batch.pop_front()
-// 	}
-// }
+		self.batch.pop_front()
+	}
+}

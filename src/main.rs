@@ -9,7 +9,7 @@ use lib::related_users::{RelatedUsers, UserRelation};
 use lib::print::{print_tweet, print_user};
 use twitter_v2::id::NumericId;
 use tasks::delete::DeleteOldTweets;
-use tasks::block::BlockWithFollowers;
+use tasks::block::{BlockWithFollowers, BlockLikers};
 use lib::archive::{Stats};
 
 fn main() {
@@ -37,6 +37,11 @@ fn main() {
 		Command::BlockWithFollowers => {
 			let user_name: String = args.options[0].to_owned();
 			BlockWithFollowers::run(&user_name);
+		},
+
+		Command::BlockLikingUsers => {
+			let tweet_id: u64 = args.options[0].to_owned().parse::<u64>().expect("Couldn't parse ID");
+			BlockLikers::run(tweet_id);
 		},
 		
 		Command::DeleteOldTweets => {

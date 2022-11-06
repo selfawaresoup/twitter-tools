@@ -48,8 +48,6 @@ impl RelatedUsers {
 				UserField::Username
 			]);
 			
-			// println!("Pagination token: {}", self.pagination_token.to_owned().unwrap_or(String::from("<None>")));
-			
 			if let Some(t) = self.pagination_token.to_owned() {
 				req.pagination_token(&t);
 			}
