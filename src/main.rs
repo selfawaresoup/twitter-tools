@@ -9,6 +9,8 @@ use tasks::delete::DeleteOldTweets;
 use tasks::block::{BlockWithFollowers, BlockLikers};
 use lib::archive::{Stats};
 
+const HELP: &'static str = include_str!("help.txt");
+
 fn main() {
 	let args = read_args();
 	match args.command {
@@ -17,7 +19,7 @@ fn main() {
 			std::process::exit(1);
 		}
 		
-		Command::Help => println!("HALP!"),
+		Command::Help => println!("{HELP}"),
 		
 		Command::GetTweet => {
 			let id = args.options[0].parse::<u64>().expect("ID needs to be a positive integer number");

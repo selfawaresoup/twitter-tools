@@ -1,0 +1,11 @@
+twitter-tools <command> <options>
+
+Commands:
+
+help
+get-user <username>
+get-tweet <tweet-id>
+archive-stats
+delete-old-tweets
+block-with-followers <username>
+block-liking-users <tweet-id>
