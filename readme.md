@@ -18,7 +18,7 @@ with `<command>` being one of the following:
 
 Extracts stats from your archive and prints them to the command line
 
-### `block-with-followrers <username>`
+### `block-with-followers <username>`
 
 Blocks the specified user and all their followers, except those you already follow (based on your archive)
 
