@@ -7,8 +7,9 @@ use lib::print::{print_tweet, print_user};
 use twitter_v2::id::NumericId;
 use tasks::delete::DeleteOldTweets;
 use tasks::block::{BlockWithFollowers, BlockLikers};
+use tasks::ranks::{MostLiked, MostRetweeted};
 use tasks::export::{ExportThreads};
-use lib::archive::{Stats, get_archive};
+use lib::archive::{Stats};
 
 const HELP: &'static str = include_str!("help.txt");
 
@@ -59,28 +60,12 @@ fn main() {
 
 		Command::FindMostLiked => {
 			let max = args.options[0].to_owned().parse::<usize>().expect("Couldn't parse maximum number");
-			let archive = get_archive();
-			let mut tweets = archive.all_tweets;
-			tweets.sort_by(|b,a| a.favorite_count.cmp(&b.favorite_count));
-			tweets.truncate(max);
-
-			for tweet in tweets {
-				println!("{}: {}", tweet.favorite_count, tweet.id);
-				println!("{}\n", tweet.full_text);
-			}
+			MostLiked::run(max);
 		},
 
 		Command::FindMostRetweeted => {
 			let max = args.options[0].to_owned().parse::<usize>().expect("Couldn't parse maximum number");
-			let archive = get_archive();
-			let mut tweets = archive.all_tweets;
-			tweets.sort_by(|b,a| a.retweet_count.cmp(&b.retweet_count));
-			tweets.truncate(max);
-
-			for tweet in tweets {
-				println!("{}: {}", tweet.retweet_count, tweet.id);
-				println!("{}\n", tweet.full_text);
-			}
+			MostRetweeted::run(max);
 		},
 
 		_ => {
