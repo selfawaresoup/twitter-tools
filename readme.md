@@ -55,3 +55,7 @@ Exports all threads from the archive that have at least `min-lengh` tweets as ma
 ### `find-most-liked <max-number>`
 
 Lists up to `<max-number>` top tweets by number of likes
+ 
+### `find-most-retweeted <max-number>`
+
+Lists up to `<max-number>` top tweets by number of retweets
