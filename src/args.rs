@@ -9,6 +9,8 @@ pub enum Command {
   DeleteOldTweets,
   ArchiveStats,
   ExportThreads,
+  FindMostLiked,
+  FindMostRetweeted,
 }
 
 pub struct CliArgs {
@@ -35,6 +37,8 @@ pub fn read_args() -> CliArgs {
       "block-liking-users" => Command::BlockLikingUsers,
       "get-all-followers" => Command::GetAllFollowers,
       "export-threads" => Command::ExportThreads,
+      "find-most-liked" => Command::FindMostLiked,
+      "find-most-retweeted" => Command::FindMostRetweeted,
 			_ => Command::Unknown
 		}
 		_ => Command::Unknown

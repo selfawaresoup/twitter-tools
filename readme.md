@@ -52,3 +52,6 @@ Prints details about the specified user (fetched from the API)
 
 Exports all threads from the archive that have at least `min-lengh` tweets as markdown files along with their attached images into the `export` directory.
  
+### `find-most-liked <max-number>`
+
+Lists up to `<max-number>` top tweets by number of likes

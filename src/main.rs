@@ -8,7 +8,7 @@ use twitter_v2::id::NumericId;
 use tasks::delete::DeleteOldTweets;
 use tasks::block::{BlockWithFollowers, BlockLikers};
 use tasks::export::{ExportThreads};
-use lib::archive::{Stats};
+use lib::archive::{Stats, get_archive};
 
 const HELP: &'static str = include_str!("help.txt");
 
@@ -40,7 +40,7 @@ fn main() {
 		},
 
 		Command::BlockLikingUsers => {
-			let tweet_id: u64 = args.options[0].to_owned().parse::<u64>().expect("Couldn't parse ID");
+			let tweet_id = args.options[0].to_owned().parse::<u64>().expect("Couldn't parse ID");
 			BlockLikers::run(tweet_id);
 		},
 		
@@ -53,9 +53,36 @@ fn main() {
 		},
 
 		Command::ExportThreads => {
-			let min_length: u64 = args.options[0].to_owned().parse::<u64>().expect("Couldn't parse minimum length");
+			let min_length = args.options[0].to_owned().parse::<u64>().expect("Couldn't parse minimum length");
 			ExportThreads::run(min_length);
-		}
+		},
+
+		Command::FindMostLiked => {
+			let max = args.options[0].to_owned().parse::<usize>().expect("Couldn't parse maximum number");
+			let archive = get_archive();
+			let mut tweets = archive.all_tweets;
+			tweets.sort_by(|b,a| a.favorite_count.cmp(&b.favorite_count));
+			tweets.truncate(max);
+
+			for tweet in tweets {
+				println!("{}: {}", tweet.favorite_count, tweet.id);
+				println!("{}\n", tweet.full_text);
+			}
+		},
+
+		Command::FindMostRetweeted => {
+			let max = args.options[0].to_owned().parse::<usize>().expect("Couldn't parse maximum number");
+			let archive = get_archive();
+			let mut tweets = archive.all_tweets;
+			tweets.sort_by(|b,a| a.retweet_count.cmp(&b.retweet_count));
+			tweets.truncate(max);
+
+			for tweet in tweets {
+				println!("{}: {}", tweet.retweet_count, tweet.id);
+				println!("{}\n", tweet.full_text);
+			}
+		},
+
 		_ => {
 			println!("Not implemented yet");
 		}

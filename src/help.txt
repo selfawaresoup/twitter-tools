@@ -9,3 +9,5 @@ archive-stats
 delete-old-tweets
 block-with-followers <username>
 block-liking-users <tweet-id>
+export-threads <min-length>
+find-most-liked <max-number>
