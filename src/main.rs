@@ -7,6 +7,7 @@ use lib::print::{print_tweet, print_user};
 use twitter_v2::id::NumericId;
 use tasks::delete::DeleteOldTweets;
 use tasks::block::{BlockWithFollowers, BlockLikers};
+use tasks::export::{ExportThreads};
 use lib::archive::{Stats};
 
 const HELP: &'static str = include_str!("help.txt");
@@ -50,6 +51,11 @@ fn main() {
 		Command::ArchiveStats => {
 			Stats::run();
 		},
+
+		Command::ExportThreads => {
+			let min_length: u64 = args.options[0].to_owned().parse::<u64>().expect("Couldn't parse minimum length");
+			ExportThreads::run(min_length);
+		}
 		_ => {
 			println!("Not implemented yet");
 		}

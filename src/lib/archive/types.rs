@@ -1,5 +1,6 @@
 use serde::Deserialize;
 use chrono::{DateTime, FixedOffset};
+use regex::Regex;
 
 #[derive(Debug, Deserialize)]
 pub struct ArchiveEntry {
@@ -13,7 +14,8 @@ pub struct ArchiveTweet {
   in_reply_to_status_id_str: Option<String>,
   created_at: String,
   favorite_count: String,
-  retweet_count: String
+  retweet_count: String,
+  extended_entities: Option<ExtendedEntitiesEntry>,
 }
 
 #[derive(Clone)]
@@ -26,6 +28,7 @@ pub struct Tweet {
   pub created_at: DateTime::<FixedOffset>,
   pub favorite_count: u64,
   pub retweet_count: u64,
+  pub media: Vec<Media>,
 }
 
 impl Tweet {
@@ -43,6 +46,15 @@ impl Tweet {
     let favorite_count = at.favorite_count.parse::<u64>().unwrap();
     let retweet_count = at.retweet_count.parse::<u64>().unwrap();
 
+    let mut media = vec![];
+    if let Some(extended_entities) = at.extended_entities {
+      for am in extended_entities.media {
+        let m = Media::from_archive_media(id, &am);
+        media.push(m);
+      }
+    }
+
+
     Tweet{
       id,
       id_str,
@@ -52,6 +64,7 @@ impl Tweet {
       created_at,
       favorite_count,
       retweet_count,
+      media,
     }
   }
 }
@@ -116,4 +129,31 @@ pub struct FollowerEntry {
 #[derive(Debug, Deserialize)]
 pub struct FollowingEntry {
   pub following: AccountIdEntry
+}
+
+
+#[derive(Debug, Deserialize)]
+struct ExtendedEntitiesEntry {
+  media: Vec<ArchiveMedia>
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ArchiveMedia {
+  media_url: String,
+}
+
+#[derive(Clone)]
+pub struct Media {
+  pub file_name: String,
+}
+
+impl Media {
+  pub fn from_archive_media(tweet_id: u64, am: &ArchiveMedia) -> Self {
+    let re = Regex::new("/([^/]+)$").unwrap();
+    let caps = re.captures(&am.media_url).expect("media id not found");
+    let media_name = caps.get(1).unwrap().as_str();
+    let file_name = format!("{tweet_id}-{media_name}");
+
+    Media{file_name}
+  }
 }

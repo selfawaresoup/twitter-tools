@@ -8,6 +8,7 @@ pub enum Command {
   BlockLikingUsers,
   DeleteOldTweets,
   ArchiveStats,
+  ExportThreads,
 }
 
 pub struct CliArgs {
@@ -28,11 +29,12 @@ pub fn read_args() -> CliArgs {
       _ => Command::Unknown
     },
 		3 => match args[1].as_str() {
-			"get-tweet" => Command::GetTweet,
+      "get-tweet" => Command::GetTweet,
       "get-user" => Command::GetUser,
       "block-with-followers" => Command::BlockWithFollowers,
       "block-liking-users" => Command::BlockLikingUsers,
       "get-all-followers" => Command::GetAllFollowers,
+      "export-threads" => Command::ExportThreads,
 			_ => Command::Unknown
 		}
 		_ => Command::Unknown

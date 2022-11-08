@@ -47,3 +47,8 @@ Prints details about the specified tweet (fetched from the API)
 ### `get-user <username>`
 
 Prints details about the specified user (fetched from the API)
+
+### `export-threads <min-length>`
+
+Exports all threads from the archive that have at least `min-lengh` tweets as markdown files along with their attached images into the `export` directory.
+ 

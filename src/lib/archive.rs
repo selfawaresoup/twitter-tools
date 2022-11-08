@@ -1,4 +1,3 @@
-
 use std::path::Path;
 use std::fs;
 use std::collections::HashMap;
@@ -80,7 +79,7 @@ pub struct Archive {
 	//tweets_by_id: HashMap<u64, Tweet>,
 	follower_ids: Vec<u64>,
 	pub following_ids: Vec<u64>,
-	threads: Vec<Thread>
+	pub threads: Vec<Thread>
 }
 
 impl Archive {
