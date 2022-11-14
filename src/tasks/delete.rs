@@ -4,7 +4,7 @@ use lib::actions::{DeleteTweet, DeleteRetweet, TweetNoOp, TweetAction};
 use dotenv;
 use chrono::offset::Utc;
 use chrono::{Duration, DateTime, TimeZone};
-
+use lib::delay::Delay;
 
 
 pub struct DeleteOldTweets {
@@ -55,8 +55,10 @@ impl DeleteOldTweets {
     }
 
     println!("{} tweets to delete", tweets_to_delete.len());
+    let mut delay = Delay::new(18);
     
     for tweet in tweets_to_delete {
+      delay.wait();
       match tweet.full_text.find("RT") {
         Some(index) => {
           if index == 0 {
